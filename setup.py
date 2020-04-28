@@ -9,5 +9,7 @@ setup(
     author='Shrivu Shankar',
     license='MIT',
     packages=['remote'],
-    entry_points = {'console_scripts': ['start-remote=remote.run:main']}
+    entry_points = {'console_scripts': ['start-remote=remote.run:main']},
+    include_package_data=True,
+    package_data={'static': ['*']}
 )

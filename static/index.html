@@ -75,20 +75,22 @@ let sendCmd = async (data) => {
 let actions = {
     forward: () => sendCmd({type: 'control', name: 'forward'}),
     back: () => sendCmd({type: 'control', name: 'back'}),
-    setCode: () => {
-        let code = document.getElementById('code').value.trim();
+    setCode: (newCode) => {
+        let code = newCode || document.getElementById('code').value.trim();
+        localStorage.setItem('remote-code', code);
         document.getElementById('code').value = code;
         document.getElementById('code').disabled = true;
         document.getElementById('code-apply').remove();
-        localStorage.setItem('remote-code', code);
     },
     setTempCode: () => {
         let tempCode = document.getElementById('tcode').value.trim();
         sendCmd({type: 'code', name: 'temp', value: tempCode});
     },
-    setMasterCode: () => {
+    setMasterCode: async () => {
         let masterCode = document.getElementById('mcode').value.trim();
-        sendCmd({type: 'code', name: 'master', value: masterCode});
+        sendCmd({type: 'code', name: 'master', value: masterCode}).then(() => {
+            actions.setCode(masterCode);
+        });
     },
     setView: (name) => {
         for(let view of views) {

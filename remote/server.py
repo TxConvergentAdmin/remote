@@ -7,7 +7,7 @@ STATIC_PATH = os.path.join(os.path.dirname(__file__), '..', 'static')
 
 
 app = Flask(__name__, static_url_path='', static_folder=STATIC_PATH)
-config = {'master-code': 'convergent', 'temp-code': 'convergent'}
+config = {'master-code': 'password', 'temp-code': 'password'}
 
 
 @app.route("/")
