@@ -1,0 +1,112 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+</head>
+
+<body>
+    <div class="ui menu">
+        <div class="header item">Remote</div>
+        <a id="tab-controls" class="active item" onclick="actions.setView('controls')">Controls</a>
+        <a id="tab-settings" class="item" onclick="actions.setView('settings')">Settings</a>
+        <div class="right menu">
+            <div class="item">
+                <div class="ui action left icon input">
+                    <i class="lock icon"></i>
+                    <input id="code" type="text" placeholder="Code">
+                    <button id="code-apply" class="ui button" onclick="actions.setCode()">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui message" id="message" style="display: none">
+        <div class="header" id="message-title"></div>
+        <p id="message-text"></p>
+      </div>
+    <div id="view-controls" style="text-align: center; position: absolute; top: 50%; left: 50%; transform: translateY(-50%) translateX(-50%)">
+        <button class="massive ui left labeled icon button" onclick="actions.back()">
+            <i class="left arrow icon"></i>
+            Back
+        </button>
+        <button class="massive ui right labeled icon button" onclick="actions.forward()">
+            <i class="right arrow icon"></i>
+            Forward
+        </button>
+    </div>
+    <div id="view-settings">
+        <div style="padding: 10px;">
+        <div class="ui form">
+            <h4 class="ui dividing header">Remote Settings</h4>
+            <div class="ui action left icon input">
+                <i class="lock icon"></i>
+                <input id="mcode" type="text" placeholder="Master Code">
+                <button id="mcode-apply" class="ui button" onclick="actions.setMasterCode()">Apply</button>
+            </div>
+            <br/><br/>
+            <div class="ui action left icon input">
+                <i class="lock icon"></i>
+                <input id="tcode" type="text" placeholder="Temp Code">
+                <button id="tcode-apply" class="ui button" onclick="actions.setTempCode()">Apply</button>
+            </div>
+        </div>
+    </div>
+    </div>
+</body>
+
+<script>
+const url = window.location.origin;
+const views = ['controls', 'settings'];
+let sendCmd = async (data) => {
+    let code = localStorage.getItem('remote-code') || "";
+    let resp = await fetch(url + '/cmd', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'    
+        },
+        body: JSON.stringify({code: code, ...data})
+    })
+    let respData = await resp.json();
+    if(respData.title && respData.message) {
+        actions.setFeedback(respData.title, respData.message);
+    }
+    return respData;
+};
+let actions = {
+    forward: () => sendCmd({type: 'control', name: 'forward'}),
+    back: () => sendCmd({type: 'control', name: 'back'}),
+    setCode: () => {
+        let code = document.getElementById('code').value.trim();
+        document.getElementById('code').value = code;
+        document.getElementById('code').disabled = true;
+        document.getElementById('code-apply').remove();
+        localStorage.setItem('remote-code', code);
+    },
+    setTempCode: () => {
+        let tempCode = document.getElementById('tcode').value.trim();
+        sendCmd({type: 'code', name: 'temp', value: tempCode});
+    },
+    setMasterCode: () => {
+        let masterCode = document.getElementById('mcode').value.trim();
+        sendCmd({type: 'code', name: 'master', value: masterCode});
+    },
+    setView: (name) => {
+        for(let view of views) {
+            let viewElem = document.getElementById('view-' + view);
+            let viewTabElem = document.getElementById('tab-' + view);
+            viewTabElem.classList = (name == view) ? 'active item':'item'
+            viewElem.style.display = (name == view) ? 'block':'none';
+        }
+    },
+    setFeedback: (title, msg) => {
+        document.getElementById('message-title').innerHTML = title;
+        document.getElementById('message-text').innerHTML = msg;
+        document.getElementById('message').style.display = 'block';
+        setTimeout(() => { document.getElementById('message').style.display = 'none'; }, 5000);
+    }
+};
+actions.setView('controls');
+document.getElementById('code').value = localStorage.getItem('remote-code') || "";
+</script>
+
+</html>
