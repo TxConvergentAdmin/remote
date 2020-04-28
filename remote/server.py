@@ -3,7 +3,7 @@ import pyautogui
 import os
 
 
-STATIC_PATH = os.path.join(os.path.dirname(__file__), '..', 'static')
+STATIC_PATH = os.path.join(os.path.dirname(__file__), 'static')
 
 
 app = Flask(__name__, static_url_path='', static_folder=STATIC_PATH)
